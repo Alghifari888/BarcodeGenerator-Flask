@@ -1,7 +1,7 @@
 # Barcode Generator - Aplikasi Web Flask
 
 <div align="center">
-  <img src="https://via.placeholder.com/150/4A90E2/FFFFFF?text=BG" alt="Logo Barcode Generator" style="border-radius: 50%;">
+![Demo](./videoujicoba.gif)
 </div>
 
 <p align="center">
