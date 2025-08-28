@@ -8,13 +8,6 @@
   Sebuah aplikasi web sederhana namun kuat yang dibangun dengan Python dan Flask untuk membuat berbagai jenis barcode dan QR code secara instan.
 </p>
 
-<p align="center">
-  <a href="#fitur-utama">Fitur</a> •
-  <a href="#teknologi-yang-digunakan">Teknologi</a> •
-  <a href="#panduan-instalasi">Instalasi</a> •
-  <a href="#struktur-proyek">Struktur Proyek</a> •
-  <a href="#panduan-berkontribusi">Berkontribusi</a>
-</p>
 
 ---
 
