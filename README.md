@@ -1,7 +1,7 @@
 # Barcode Generator - Aplikasi Web Flask
 
 ## 🎥 Demo
-![Demo](./videoujicoba.gif)
+![Demo](./ujicoba.gif)
 
 <p align="center">
   Sebuah aplikasi web sederhana namun kuat yang dibangun dengan Python dan Flask untuk membuat berbagai jenis barcode dan QR code secara instan.
