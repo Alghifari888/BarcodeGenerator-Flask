@@ -4,7 +4,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 
 # Import library barcode
 import barcode
-# PERBAIKAN: Mengganti SVGImageWriter menjadi SVGWriter
 from barcode.writer import ImageWriter, SVGWriter 
 import qrcode
 
@@ -44,8 +43,11 @@ def generate():
         flash('Untuk UPC-A, data harus terdiri dari 11 digit angka.', 'error')
         return render_template('index.html', last_data=data)
     
+    # --- LOGIKA PINTAR UNTUK MENGATASI QR CODE + SVG ---
     if barcode_type == 'qrcode' and output_format == 'svg':
-        flash('QR Code hanya bisa di-generate dalam format PNG saat ini.', 'warning')
+        # Beri pesan peringatan yang jelas
+        flash('QR Code tidak mendukung SVG, hasilnya otomatis di-generate sebagai PNG.', 'warning')
+        # Paksa format menjadi PNG dan lanjutkan proses
         output_format = 'png'
 
     try:
@@ -64,14 +66,11 @@ def generate():
             img.save(os.path.join(app.config['UPLOAD_FOLDER'], final_filename))
         else:
             CODE = barcode.get_barcode_class(barcode_type)
-            
-            # PERBAIKAN: Menggunakan SVGWriter yang benar
             writer = SVGWriter() if output_format == 'svg' else ImageWriter()
-            
             my_barcode = CODE(data, writer=writer)
-            # Simpan tanpa ekstensi, library akan menambahkannya
             my_barcode.save(filepath) 
 
+        # Tampilkan halaman hasil
         return render_template(
             'result.html', 
             barcode_image=final_filename, 
@@ -81,6 +80,7 @@ def generate():
         )
 
     except Exception as e:
+        # Menangani jika ada error lain yang tak terduga
         flash(f'Terjadi kesalahan saat membuat barcode: {e}', 'error')
         return redirect(url_for('index'))
 

@@ -11,6 +11,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        select option:disabled {
+            background: #e5e7eb;
+            color: #9ca3af;
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
@@ -21,12 +25,13 @@
                 <p class="text-gray-500 mt-2">Buat barcode atau QR code dengan mudah.</p>
             </div>
 
-            <!-- Flash Messages for Errors -->
+            <!-- Flash Messages -->
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
                 {% for category, message in messages %}
-                  <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
-                    <strong class="font-bold">Oops!</strong>
+                  <!-- PERBAIKAN DI SINI: Mengganti 'set-bg_color' menjadi 'set bg_color' -->
+                  {% set bg_color = 'bg-red-100 border-red-400 text-red-700' if category == 'error' else 'bg-yellow-100 border-yellow-400 text-yellow-700' %}
+                  <div class="{{ bg_color }} px-4 py-3 rounded-lg relative mb-6" role="alert">
                     <span class="block sm:inline">{{ message }}</span>
                   </div>
                 {% endfor %}
@@ -52,7 +57,6 @@
                     </select>
                 </div>
 
-                <!-- Opsi Warna (Hanya untuk QR Code) -->
                 <div id="color-options" class="hidden space-y-4 mb-8">
                     <h3 class="text-gray-700 text-sm font-semibold mb-2">Opsi Warna (Khusus QR Code)</h3>
                     <div class="flex items-center justify-between">
@@ -65,7 +69,6 @@
                     </div>
                 </div>
 
-                <!-- Pilihan Format Output -->
                 <div class="mb-8">
                     <label for="output_format" class="block text-gray-700 text-sm font-semibold mb-2">Format Output</label>
                     <select id="output_format" name="output_format"
@@ -84,25 +87,35 @@
             </form>
         </div>
         <p class="text-center text-gray-500 text-xs mt-6">
-            &copy;2025 alghifari888.
+            &copy;2024 Barcode Generator App.
         </p>
     </div>
 
-    <!-- Javascript untuk menampilkan/menyembunyikan opsi warna -->
+    <!-- JAVASCRIPT PINTAR UNTUK MENCEGAH ERROR -->
     <script>
-        document.getElementById('barcode_type').addEventListener('change', function() {
-            var colorOptions = document.getElementById('color-options');
-            var formatSelect = document.getElementById('output_format');
-            
-            if (this.value === 'qrcode') {
+        function handleBarcodeTypeChange() {
+            const barcodeTypeSelect = document.getElementById('barcode_type');
+            const colorOptions = document.getElementById('color-options');
+            const formatSelect = document.getElementById('output_format');
+            const svgOption = formatSelect.querySelector('option[value="svg"]');
+
+            if (barcodeTypeSelect.value === 'qrcode') {
                 colorOptions.classList.remove('hidden');
-                // Otomatis set ke PNG dan disable SVG untuk QR Code
+                // Otomatis pilih PNG dan non-aktifkan opsi SVG
                 formatSelect.value = 'png';
-                // Anda bisa menambahkan logic untuk disable opsi SVG jika mau
+                svgOption.disabled = true;
             } else {
                 colorOptions.classList.add('hidden');
+                // Aktifkan kembali opsi SVG untuk tipe lain
+                svgOption.disabled = false;
             }
-        });
+        }
+
+        // Jalankan fungsi saat pilihan jenis barcode berubah
+        document.getElementById('barcode_type').addEventListener('change', handleBarcodeTypeChange);
+
+        // Jalankan juga saat halaman pertama kali dimuat, untuk jaga-jaga
+        document.addEventListener('DOMContentLoaded', handleBarcodeTypeChange);
     </script>
 </body>
 </html>
