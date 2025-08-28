@@ -52,6 +52,29 @@
                     </select>
                 </div>
 
+                <!-- Opsi Warna (Hanya untuk QR Code) -->
+                <div id="color-options" class="hidden space-y-4 mb-8">
+                    <h3 class="text-gray-700 text-sm font-semibold mb-2">Opsi Warna (Khusus QR Code)</h3>
+                    <div class="flex items-center justify-between">
+                        <label for="fill_color" class="text-gray-600">Warna Utama:</label>
+                        <input type="color" id="fill_color" name="fill_color" value="#000000" class="h-8 w-14 rounded-md border border-gray-300">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <label for="back_color" class="text-gray-600">Warna Latar:</label>
+                        <input type="color" id="back_color" name="back_color" value="#FFFFFF" class="h-8 w-14 rounded-md border border-gray-300">
+                    </div>
+                </div>
+
+                <!-- Pilihan Format Output -->
+                <div class="mb-8">
+                    <label for="output_format" class="block text-gray-700 text-sm font-semibold mb-2">Format Output</label>
+                    <select id="output_format" name="output_format"
+                            class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300">
+                        <option value="png">PNG (Gambar Biasa)</option>
+                        <option value="svg">SVG (Vektor, Kualitas Tinggi)</option>
+                    </select>
+                </div>
+
                 <div class="flex items-center justify-center">
                     <button type="submit"
                             class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline transform hover:scale-105 transition duration-300">
@@ -61,8 +84,25 @@
             </form>
         </div>
         <p class="text-center text-gray-500 text-xs mt-6">
-            &copy;2024 Barcode Generator App.
+            &copy;2025 alghifari888.
         </p>
     </div>
+
+    <!-- Javascript untuk menampilkan/menyembunyikan opsi warna -->
+    <script>
+        document.getElementById('barcode_type').addEventListener('change', function() {
+            var colorOptions = document.getElementById('color-options');
+            var formatSelect = document.getElementById('output_format');
+            
+            if (this.value === 'qrcode') {
+                colorOptions.classList.remove('hidden');
+                // Otomatis set ke PNG dan disable SVG untuk QR Code
+                formatSelect.value = 'png';
+                // Anda bisa menambahkan logic untuk disable opsi SVG jika mau
+            } else {
+                colorOptions.classList.add('hidden');
+            }
+        });
+    </script>
 </body>
 </html>

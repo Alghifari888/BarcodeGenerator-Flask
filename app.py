@@ -4,12 +4,13 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 
 # Import library barcode
 import barcode
-from barcode.writer import ImageWriter
+# PERBAIKAN: Mengganti SVGImageWriter menjadi SVGWriter
+from barcode.writer import ImageWriter, SVGWriter 
 import qrcode
 
 # Inisialisasi aplikasi Flask
 app = Flask(__name__)
-app.secret_key = 'kunci_rahasia_untuk_flash_messages' # Diperlukan untuk flash message
+app.secret_key = 'kunci_rahasia_untuk_flash_messages'
 
 # Konfigurasi folder untuk menyimpan gambar barcode
 BARCODE_FOLDER = os.path.join('static', 'barcodes')
@@ -28,55 +29,58 @@ def generate():
     """Menangani proses pembuatan barcode."""
     data = request.form.get('data')
     barcode_type = request.form.get('barcode_type')
+    output_format = request.form.get('output_format', 'png')
 
     # --- Validasi Input ---
     if not data:
         flash('Data tidak boleh kosong!', 'error')
         return redirect(url_for('index'))
-
-    # Validasi spesifik untuk EAN-13 dan UPC-A
-    if barcode_type == 'ean13':
-        if not data.isdigit() or len(data) != 12:
-            flash('Untuk EAN-13, data harus terdiri dari 12 digit angka.', 'error')
-            return render_template('index.html', last_data=data)
     
-    if barcode_type == 'upca':
-        if not data.isdigit() or len(data) != 11:
-            flash('Untuk UPC-A, data harus terdiri dari 11 digit angka.', 'error')
-            return render_template('index.html', last_data=data)
+    if barcode_type == 'ean13' and (not data.isdigit() or len(data) != 12):
+        flash('Untuk EAN-13, data harus terdiri dari 12 digit angka.', 'error')
+        return render_template('index.html', last_data=data)
+    
+    if barcode_type == 'upca' and (not data.isdigit() or len(data) != 11):
+        flash('Untuk UPC-A, data harus terdiri dari 11 digit angka.', 'error')
+        return render_template('index.html', last_data=data)
+    
+    if barcode_type == 'qrcode' and output_format == 'svg':
+        flash('QR Code hanya bisa di-generate dalam format PNG saat ini.', 'warning')
+        output_format = 'png'
 
     try:
-        # Membuat nama file yang unik untuk menghindari tumpukan
         filename = f"{uuid.uuid4()}"
+        final_filename = f"{filename}.{output_format}"
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        
-        final_filename = ""
 
-        # --- Logika Pembuatan Barcode ---
         if barcode_type == 'qrcode':
-            # Generate QR Code
-            img = qrcode.make(data)
-            final_filename = filename + '.png'
+            fill_color = request.form.get('fill_color', 'black')
+            back_color = request.form.get('back_color', 'white')
+
+            qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
+            qr.add_data(data)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color=fill_color, back_color=back_color)
             img.save(os.path.join(app.config['UPLOAD_FOLDER'], final_filename))
         else:
-            # Generate barcode linear (Code128, EAN-13, UPC-A)
             CODE = barcode.get_barcode_class(barcode_type)
-            # Membuat barcode dengan writer ImageWriter untuk output PNG
-            my_barcode = CODE(data, writer=ImageWriter())
-            # Simpan barcode (tanpa ekstensi, akan ditambahkan oleh library)
-            my_barcode.save(filepath)
-            final_filename = filename + '.png'
+            
+            # PERBAIKAN: Menggunakan SVGWriter yang benar
+            writer = SVGWriter() if output_format == 'svg' else ImageWriter()
+            
+            my_barcode = CODE(data, writer=writer)
+            # Simpan tanpa ekstensi, library akan menambahkannya
+            my_barcode.save(filepath) 
 
-        # Mengarahkan ke halaman hasil
         return render_template(
             'result.html', 
             barcode_image=final_filename, 
             data=data, 
-            barcode_type=barcode_type.upper()
+            barcode_type=barcode_type.upper(),
+            output_format=output_format
         )
 
     except Exception as e:
-        # Menangani jika ada error saat pembuatan barcode
         flash(f'Terjadi kesalahan saat membuat barcode: {e}', 'error')
         return redirect(url_for('index'))
 
